@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>OnionGrade AI — Smart Vision for Accurate Onion Quality Grading</title>
+  <meta name="description" content="AI-Powered Onion Quality Assessment and Grading platform with live camera detection, AGMARK multi-parameter scoring, and instant certified digital reports.">
+  <meta name="keywords" content="Onion grading, AI agriculture, computer vision onion quality, live camera onion detection, AGMARK grading, APMC mandi">
+
+  <!-- Google Fonts: Inter & Outfit & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js for Mandi Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+
+  <!-- ========================================================================
+       TOP UNIFIED NAVIGATION BAR (SINGLE CONSISTENT LOCATION)
+       ======================================================================== -->
+  <header class="agri-nav-header">
+    <div class="header-inner">
+      
+      <!-- Brand Logo & Name -->
+      <div class="brand-wrapper" onclick="appController.switchTab('home')" style="cursor:pointer;" title="Go to Home Dashboard">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 40 40" width="28" height="28">
+            <path d="M20 4 C15 12 8 18 8 26 C8 32.6 13.4 38 20 38 C26.6 38 32 32.6 32 26 C32 18 25 12 20 4 Z" fill="#81c784" />
+            <path d="M20 9 C17 15 12 20 12 26 C12 30.4 15.6 34 20 34 C24.4 34 28 30.4 28 26 C28 20 23 15 20 9 Z" fill="#2e7d32" />
+            <path d="M20 15 C19 18 16 22 16 26 C16 28.2 17.8 30 20 30 C22.2 30 24 28.2 24 26 C24 22 21 18 20 15 Z" fill="#e8f5e9" />
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>
+            OnionGrade <span class="highlight">AI</span>
+          </h1>
+          <div class="brand-tagline">Smart Vision Quality Grading</div>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs: Home, Scan, Results, Reports, Analyze, Profile -->
+      <nav class="nav-tab-pills" id="nav-tabs-container" aria-label="Main Navigation">
+        <button class="nav-tab-pill active" data-tab="home" onclick="appController.switchTab('home')" title="Home Dashboard">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-tab-pill" data-tab="scan" onclick="appController.switchTab('scan')" title="Live Camera & Scanner">
+          <i class="fa-solid fa-camera"></i>
+          <span>Scan</span>
+        </button>
+        <button class="nav-tab-pill" data-tab="results" onclick="appController.switchTab('results')" title="Scan Results & Defect Localization">
+          <i class="fa-solid fa-square-poll-vertical"></i>
+          <span>Results</span>
+        </button>
+        <button class="nav-tab-pill" data-tab="reports" onclick="appController.switchTab('reports')" title="Quality Grading Report">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Reports</span>
+        </button>
+        <button class="nav-tab-pill" data-tab="analyze" onclick="appController.switchTab('analyze')" title="Procurement Analytics & History">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Analyze</span>
+        </button>
+        <button class="nav-tab-pill" data-tab="profile" onclick="appController.switchTab('profile')" title="Farmer & Account Profile">
+          <i class="fa-solid fa-user"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="header-actions">
+        <!-- Live Mandi Terminal Badge -->
+        <div class="mandi-live-badge" title="Live Connection: APMC Lasalgaon Terminal">
+          <span class="pulse-dot"></span>
+          <span class="mandi-badge-text">APMC Live</span>
+        </div>
+
+        <!-- Theme Toggle (Light / Dark) -->
+        <button id="theme-toggle" class="action-btn-circle" title="Toggle Light/Dark Theme" onclick="appController.toggleTheme()">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <!-- User Profile Pill / Direct Link to Profile -->
+        <div class="user-auth-pill" id="user-auth-pill" onclick="appController.switchTab('profile')" title="Open Profile & Account">
+          <div class="user-avatar-circle" id="header-user-avatar">👨‍🌾</div>
+          <div class="user-pill-text">
+            <span class="user-name" id="header-user-name">Ramesh Patil</span>
+            <span class="user-role" id="header-user-role">Farmer (Kisan)</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-muted); margin-left:0.25rem;"></i>
+        </div>
+
+        <!-- Quick Scan Header CTA -->
+        <button class="btn-ai-analyze header-cta-btn" onclick="scannerEngine.startLiveDetectionMode()" title="Open Scanner">
+          <i class="fa-solid fa-camera"></i>
+          <span class="header-btn-text">Scan Onion</span>
+        </button>
+
+        <!-- Mobile Navigation Toggle Button -->
+        <button id="mobile-menu-btn" class="action-btn-circle mobile-hamburger-btn" title="Toggle Menu" onclick="appController.toggleMobileMenu()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer / Dropdown -->
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+      <div class="mobile-nav-links">
+        <button class="mobile-nav-link active" data-tab="home" onclick="appController.switchTab('home'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </button>
+        <button class="mobile-nav-link" data-tab="scan" onclick="appController.switchTab('scan'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-camera"></i>
+          <span>Scan</span>
+        </button>
+        <button class="mobile-nav-link" data-tab="results" onclick="appController.switchTab('results'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-square-poll-vertical"></i>
+          <span>Results</span>
+        </button>
+        <button class="mobile-nav-link" data-tab="reports" onclick="appController.switchTab('reports'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Reports</span>
+        </button>
+        <button class="mobile-nav-link" data-tab="analyze" onclick="appController.switchTab('analyze'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Analyze</span>
+        </button>
+        <button class="mobile-nav-link" data-tab="profile" onclick="appController.switchTab('profile'); appController.closeMobileMenu();">
+          <i class="fa-solid fa-user"></i>
+          <span>Profile</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN APP CONTAINER
+       ======================================================================== -->
+  <main class="main-app-container">
+
+    <!-- ----------------------------------------------------------------------
+         TAB 1: HOME (FARMER DASHBOARD)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-home" class="view-section active">
+      
+      <!-- TOP FARMER GREETING BANNER -->
+      <div class="farmer-greeting-banner">
+        <div class="banner-text-content">
+          <div class="greeting-badge">
+            <span class="badge-dot"></span>
+            <span>Smart Vision v2.4 Online</span>
+          </div>
+          <h2 class="greeting-title">Hello, <span id="dash-greeting-name">Ramesh!</span> 👋</h2>
+          <p class="greeting-subtitle">Accurate AI computer vision for instant onion grading, defect localization, and fair Mandi pricing.</p>
+          
+          <div class="banner-quick-actions">
+            <button class="btn-banner-scan" onclick="scannerEngine.startLiveDetectionMode()">
+              <i class="fa-solid fa-camera"></i> Quick Live Scan
+            </button>
+            <button class="btn-banner-demo" onclick="scannerEngine.loadPreset('b', true)">
+              <i class="fa-solid fa-flask"></i> Load Demo Lot
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating Onion Art -->
+        <div class="banner-onion-art">
+          <div class="onion-art-bubble">
+            <span class="art-emoji">🧅</span>
+            <div class="art-tag">AGMARK Objective</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK SCAN HERO CARD -->
+      <div class="quick-scan-hero-card">
+        <div class="quick-scan-left">
+          <div class="quick-scan-icon-bubble">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <h3 class="quick-scan-title">Quick AI Camera Scan</h3>
+            <p class="quick-scan-desc">Point camera at onion or upload photo for real-time size, shape, and defect analysis</p>
+          </div>
+        </div>
+
+        <button class="quick-scan-camera-btn" onclick="scannerEngine.startLiveDetectionMode()" title="Start Camera Scan">
+          <i class="fa-solid fa-camera"></i>
+          <span>Scan Now</span>
+        </button>
+      </div>
+
+      <!-- 4 WORKFLOW PILLS (CAPTURE -> ANALYZE -> DETECT -> GRADE) -->
+      <div class="workflow-steps-strip">
+        <div class="wf-step-chip" onclick="scannerEngine.startLiveDetectionMode()" title="Open Camera">
+          <div class="wf-icon"><i class="fa-solid fa-camera"></i></div>
+          <span>1. Capture</span>
+        </div>
+        <div class="wf-step-chip" onclick="appController.switchTab('scan')" title="AI Vision Analysis">
+          <div class="wf-icon"><i class="fa-solid fa-brain"></i></div>
+          <span>2. Analyze</span>
+        </div>
+        <div class="wf-step-chip" onclick="appController.switchTab('results')" title="Defect Segmentation">
+          <div class="wf-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <span>3. Detect</span>
+        </div>
+        <div class="wf-step-chip" onclick="appController.switchTab('reports')" title="AGMARK Quality Grade">
+          <div class="wf-icon"><i class="fa-solid fa-chart-simple"></i></div>
+          <span>4. Grade</span>
+        </div>
+      </div>
+
+      <!-- RECENT SCANS SECTION WITH DELETE AND VIEW -->
+      <div class="recent-scans-section">
+        <div class="section-title-row">
+          <div>
+            <h3 class="section-heading-dark"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary-emerald);"></i> Recent Scans</h3>
+            <p class="section-subtext">Click any scan to inspect defect segmentation, score breakdown, and quality report</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <button class="link-btn-green" onclick="appController.switchTab('analyze')">View Ledger <i class="fa-solid fa-arrow-right"></i></button>
+            <button class="btn-restore-samples" onclick="scanManager.restoreDefaultScans()" title="Restore Sample Scans">
+              <i class="fa-solid fa-rotate-left"></i> Reset Samples
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Scans Cards Container -->
+        <div class="recent-scans-list" id="recent-scans-container">
+          <!-- Dynamically Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- MANDI QUALITY SUMMARY METRICS -->
+      <div class="mandi-summary-grid">
+        <div class="mandi-kpi-card">
+          <div class="mandi-kpi-icon" style="background:#e8f5e9; color:#2e7d32;"><i class="fa-solid fa-award"></i></div>
+          <div>
+            <div class="mandi-kpi-num" id="stat-kpi-grade-a">64%</div>
+            <div class="mandi-kpi-lbl">Grade A Export Ratio</div>
+          </div>
+        </div>
+        <div class="mandi-kpi-card">
+          <div class="mandi-kpi-icon" style="background:#e3f2fd; color:#1976d2;"><i class="fa-solid fa-ruler-horizontal"></i></div>
+          <div>
+            <div class="mandi-kpi-num">58.4 <span style="font-size:0.8rem;">mm</span></div>
+            <div class="mandi-kpi-lbl">Avg. Calibrated Size</div>
+          </div>
+        </div>
+        <div class="mandi-kpi-card">
+          <div class="mandi-kpi-icon" style="background:#fff3e0; color:#f57c00;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div>
+            <div class="mandi-kpi-num">₹2,650</div>
+            <div class="mandi-kpi-lbl">Grade A Mandi Price / Qtl</div>
+          </div>
+        </div>
+        <div class="mandi-kpi-card">
+          <div class="mandi-kpi-icon" style="background:#f3e5f5; color:#7b1fa2;"><i class="fa-solid fa-shield-halved"></i></div>
+          <div>
+            <div class="mandi-kpi-num">96.8%</div>
+            <div class="mandi-kpi-lbl">AI Vision Confidence</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         TAB 2: SCAN (LIVE CAMERA ONION DETECTION & SCANNER INTERFACE)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-scan" class="view-section">
+      
+      <div class="section-top-bar">
+        <div>
+          <h2 class="page-title"><i class="fa-solid fa-video" style="color:var(--primary-emerald);"></i> Live Camera & AI Detection</h2>
+          <p class="page-subtitle">Real-time computer vision bounding box tracking, size caliper overlay, and defect localization</p>
+        </div>
+        <div class="quick-nav-actions">
+          <button class="btn-secondary-agri" onclick="scannerEngine.switchCameraFacing()">
+            <i class="fa-solid fa-camera-rotate"></i> Flip Camera
+          </button>
+          <button class="btn-secondary-agri" onclick="scannerEngine.toggleLiveAI()">
+            <i class="fa-solid fa-microchip"></i> <span id="btn-live-ai-text">Live AI: ON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanner Workspace -->
+      <div class="scanner-camera-workspace">
+        
+        <!-- Live Video & Interactive Detection Viewport -->
+        <div class="camera-viewport-card" id="camera-viewport-box">
+          <!-- WebRTC Video Element -->
+          <video id="live-camera-feed" autoplay playsinline muted></video>
+          
+          <!-- Static Preview Image (When Camera is stopped or file uploaded) -->
+          <img id="static-preview-img" src="onion_grade_b.jpg" alt="Onion Scan Preview">
+
+          <!-- Real-Time AI Canvas Overlay (30 FPS tracking & contours) -->
+          <canvas id="live-ai-overlay-canvas"></canvas>
+
+          <!-- Animated Scanner Laser Bar -->
+          <div class="camera-laser-bar" id="camera-laser-bar"></div>
+
+          <!-- Target Reticle Corners -->
+          <div class="reticle-corner tl"></div>
+          <div class="reticle-corner tr"></div>
+          <div class="reticle-corner bl"></div>
+          <div class="reticle-corner br"></div>
+
+          <!-- Real-time HUD Status Pill -->
+          <div class="live-camera-hud-badge" id="camera-hud-badge">
+            <span class="pulse-dot"></span>
+            <span id="hud-status-text">AI Tracking Active • 1 Onion Detected</span>
+          </div>
+
+          <!-- Live mm Measurement Caliper HUD -->
+          <div class="live-caliper-hud" id="live-caliper-hud">
+            <i class="fa-solid fa-ruler-combined"></i>
+            <span id="live-caliper-text">Ø 58.4 mm (Standard Size)</span>
+          </div>
+
+          <!-- Frame Center Crosshair Guide -->
+          <div class="center-crosshair"></div>
+        </div>
+
+        <!-- Camera Controls & Benchmark Lot Selector -->
+        <div class="camera-control-sidebar">
+          
+          <!-- Main Primary Capture Action -->
+          <div class="capture-action-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+              <span style="font-weight:800; font-size:0.95rem;"><i class="fa-solid fa-crosshairs" style="color:var(--primary-emerald);"></i> Capture & Grade</span>
+              <span class="ai-conf-pill" id="live-conf-pill">96.8% Conf</span>
+            </div>
+
+            <!-- Big Capture Button -->
+            <button class="btn-giant-capture" id="btn-giant-capture" onclick="scannerEngine.captureAndAnalyze()">
+              <div class="capture-inner-ring">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div class="capture-btn-text">
+                <strong>Capture & Analyze with AI</strong>
+                <span>Run full AGMARK multi-parameter grading</span>
+              </div>
+            </button>
+
+            <!-- Upload & Camera Toggle Sub-Buttons -->
+            <div class="camera-sub-actions">
+              <input type="file" id="file-input-el" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="scannerEngine.handleFileUpload(event)">
+              
+              <button class="btn-secondary-agri" onclick="document.getElementById('file-input-el').click()" style="flex:1;" title="Upload photo from device">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+              </button>
+
+              <button class="btn-secondary-agri" id="btn-camera-power" onclick="scannerEngine.toggleCameraPower()" style="flex:1;" title="Turn camera on/off">
+                <i class="fa-solid fa-video"></i> <span id="cam-power-text">Camera: ON</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Physical Calibration Standard Dropdown -->
+          <div class="calib-selector-card">
+            <div style="font-size:0.8rem; font-weight:800; color:var(--text-muted); margin-bottom:0.4rem;">
+              <i class="fa-solid fa-ruler" style="color:var(--primary-emerald);"></i> Size Calibration Standard:
+            </div>
+            <select id="calib-standard-select" class="calib-select-dropdown" onchange="scannerEngine.updateCalibrationStandard(this.value)">
+              <option value="coin10">₹10 Coin Reference (27.0 mm)</option>
+              <option value="card">Standard Agri Card (85.6 mm)</option>
+              <option value="ruler">Industrial Steel Scale (150.0 mm)</option>
+              <option value="auto">Auto-Contour AI Estimation</option>
+            </select>
+          </div>
+
+          <!-- Deterministic Benchmark Presets -->
+          <div class="preset-selector-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+              <span style="font-size:0.8rem; font-weight:800; color:var(--text-muted);">Load Demo Benchmark Lot:</span>
+            </div>
+            
+            <div class="sample-preset-scroller">
+              <button class="preset-chip-btn" id="chip-sample-a" onclick="scannerEngine.loadPreset('a', true)">
+                <span style="color:var(--grade-a); font-weight:800;">● Grade A</span> Export Lot (58mm)
+              </button>
+              <button class="preset-chip-btn active" id="chip-sample-b" onclick="scannerEngine.loadPreset('b', true)">
+                <span style="color:var(--grade-b); font-weight:800;">● Grade B</span> Minor Damage (52mm)
+              </button>
+              <button class="preset-chip-btn" id="chip-sample-c" onclick="scannerEngine.loadPreset('c', true)">
+                <span style="color:var(--grade-c); font-weight:800;">● Grade C</span> Sprouted (44mm)
+              </button>
+              <button class="preset-chip-btn" id="chip-sample-reject" onclick="scannerEngine.loadPreset('reject', true)">
+                <span style="color:var(--grade-reject); font-weight:800;">● Reject</span> Black Mold Rot
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         TAB 3: RESULTS (SCAN RESULT & DEFECT LOCALIZATION)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-results" class="view-section">
+      
+      <!-- Top Sub-Header -->
+      <div class="screen-sub-header">
+        <button class="btn-sub-back" onclick="appController.switchTab('scan')" title="Back to Scanner">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="sub-header-title">Scan Result</h2>
+        <button class="btn-sub-action" onclick="appController.shareScanResult()" title="Share Result">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+      </div>
+
+      <!-- Result Content Layout -->
+      <div class="scan-result-card-wrapper">
+        
+        <!-- Overall Grade & Radial Score Header -->
+        <div class="result-overall-grade-card">
+          <div class="grade-text-group">
+            <div class="grade-small-label"><i class="fa-solid fa-shield-halved"></i> Overall Grade</div>
+            <div class="grade-main-text" id="sr-grade-title">Grade B</div>
+            <div class="grade-sub-text" id="sr-grade-desc">Minor Defects</div>
+          </div>
+
+          <!-- Circular Score Counter -->
+          <div class="circular-score-wrapper">
+            <svg class="radial-score-svg" viewBox="0 0 90 90">
+              <circle class="radial-circle-bg" cx="45" cy="45" r="38"></circle>
+              <circle class="radial-circle-val" id="sr-circle-val" cx="45" cy="45" r="38"></circle>
+            </svg>
+            <div class="radial-score-text">
+              <div class="radial-score-num" id="sr-score-num">76</div>
+              <div class="radial-score-denom">/ 100</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Segmented Onion Visual with Canvas Overlays -->
+        <div class="segmented-onion-card">
+          <div class="segmented-img-container">
+            <img id="sr-onion-img" src="onion_grade_b.jpg" alt="Analyzed Onion">
+            <canvas id="sr-onion-canvas"></canvas>
+          </div>
+          <div class="segment-caption">
+            <i class="fa-solid fa-vector-square" style="color:var(--primary-emerald);"></i>
+            <span>Visual Defect Segmentation Overlay (YOLOv8-Seg)</span>
+          </div>
+        </div>
+
+        <!-- Quality Analysis Parameter Items -->
+        <div class="quality-analysis-box">
+          <h3 class="analysis-box-title">Quality Analysis Parameters</h3>
+
+          <div class="qa-item-row" id="qa-row-surface">
+            <div class="qa-item-left">
+              <i class="fa-solid fa-triangle-exclamation qa-icon warn"></i>
+              <span class="qa-label">Surface Damage</span>
+            </div>
+            <div class="qa-item-right">
+              <span class="qa-status-val warn" id="qa-val-surface">Minor</span>
+            </div>
+          </div>
+
+          <div class="qa-item-row" id="qa-row-shape">
+            <div class="qa-item-left">
+              <i class="fa-solid fa-triangle-exclamation qa-icon warn"></i>
+              <span class="qa-label">Shape</span>
+            </div>
+            <div class="qa-item-right">
+              <span class="qa-status-val warn" id="qa-val-shape">Slightly Abnormal</span>
+            </div>
+          </div>
+
+          <div class="qa-item-row" id="qa-row-color">
+            <div class="qa-item-left">
+              <i class="fa-solid fa-circle-check qa-icon pass"></i>
+              <span class="qa-label">Color</span>
+            </div>
+            <div class="qa-item-right">
+              <span class="qa-status-val pass" id="qa-val-color">Good</span>
+            </div>
+          </div>
+
+          <div class="qa-item-row" id="qa-row-size">
+            <div class="qa-item-left">
+              <i class="fa-solid fa-circle-check qa-icon pass"></i>
+              <span class="qa-label">Size</span>
+            </div>
+            <div class="qa-item-right">
+              <span class="qa-status-val pass" id="qa-val-size">Acceptable</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lightbulb Insight Callout -->
+        <div class="insight-lightbulb-card">
+          <div class="insight-bulb-icon">💡</div>
+          <p class="insight-text" id="sr-insight-text">
+            This onion has minor surface damage and a slightly abnormal shape, but color and size are within acceptable range.
+          </p>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="result-action-buttons">
+          <button class="btn-primary-green" onclick="appController.switchTab('reports')">
+            <i class="fa-solid fa-file-invoice"></i> View Full Quality Report
+          </button>
+          <button class="btn-secondary-agri" onclick="scannerEngine.startLiveDetectionMode()">
+            <i class="fa-solid fa-camera"></i> Scan Another Onion
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         TAB 4: REPORTS (QUALITY REPORT & PDF DOWNLOAD)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-reports" class="view-section">
+      
+      <!-- Top Navigation Bar for Report Screen -->
+      <div class="screen-sub-header">
+        <button class="btn-sub-back" onclick="appController.switchTab('results')" title="Back to Results">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="sub-header-title">Quality Report</h2>
+        <button class="btn-sub-action" onclick="appController.downloadReportPDF()" title="Download PDF Report">
+          <i class="fa-solid fa-download"></i>
+        </button>
+      </div>
+
+      <!-- Report Document Card Container -->
+      <div class="quality-report-card-wrapper">
+        
+        <!-- Header Metadata: Report ID, Date & Time -->
+        <div class="report-meta-header">
+          <div>
+            <div class="meta-label"><i class="fa-regular fa-calendar"></i> Report ID</div>
+            <div class="meta-val mono-font" id="qr-report-id">RPT_2026_09_02_001</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="meta-label">Date & Time</div>
+            <div class="meta-val" id="qr-date-time">02 Sep 2026, 10:45 AM</div>
+          </div>
+        </div>
+
+        <!-- Sample Preview & Summary Card -->
+        <div class="report-sample-summary-card">
+          <div class="sample-img-box">
+            <img id="qr-sample-img" src="onion_grade_b.jpg" alt="Sample Onion">
+          </div>
+          
+          <div class="sample-meta-details">
+            <div class="sample-meta-row">
+              <span class="meta-key">Overall Grade</span>
+              <span class="grade-pill-tag grade-b" id="qr-grade-pill">Grade B</span>
+            </div>
+            <div class="sample-meta-row">
+              <span class="meta-key">Quality Score</span>
+              <span class="score-bold-val" id="qr-score-val">76 / 100</span>
+            </div>
+            <div class="sample-meta-row">
+              <span class="meta-key">Sample ID</span>
+              <span class="meta-data-val mono-font" id="qr-sample-id">Sample_2026_09_02_01</span>
+            </div>
+            <div class="sample-meta-row">
+              <span class="meta-key">Source</span>
+              <span class="meta-data-val" id="qr-source-val">Lasalgaon APMC Mandi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Breakdown Progress Bars -->
+        <div class="quality-breakdown-card">
+          <h3 class="breakdown-title">Quality Breakdown</h3>
+
+          <!-- Surface Damage -->
+          <div class="qb-metric-row">
+            <div class="qb-label-row">
+              <span class="qb-name"><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-amber);"></i> Surface Damage</span>
+              <span class="qb-pct" id="qb-pct-surface" style="color:var(--accent-amber);">25%</span>
+            </div>
+            <div class="qb-bar-track">
+              <div class="qb-bar-fill" id="qb-bar-surface" style="width:25%; background:#f59e0b;"></div>
+            </div>
+          </div>
+
+          <!-- Shape -->
+          <div class="qb-metric-row">
+            <div class="qb-label-row">
+              <span class="qb-name"><i class="fa-solid fa-triangle-exclamation" style="color:#eab308;"></i> Shape</span>
+              <span class="qb-pct" id="qb-pct-shape" style="color:#eab308;">30%</span>
+            </div>
+            <div class="qb-bar-track">
+              <div class="qb-bar-fill" id="qb-bar-shape" style="width:30%; background:#eab308;"></div>
+            </div>
+          </div>
+
+          <!-- Color -->
+          <div class="qb-metric-row">
+            <div class="qb-label-row">
+              <span class="qb-name"><i class="fa-solid fa-circle-check" style="color:var(--primary-emerald);"></i> Color</span>
+              <span class="qb-pct" id="qb-pct-color" style="color:var(--primary-emerald);">90%</span>
+            </div>
+            <div class="qb-bar-track">
+              <div class="qb-bar-fill" id="qb-bar-color" style="width:90%; background:var(--primary-emerald);"></div>
+            </div>
+          </div>
+
+          <!-- Size -->
+          <div class="qb-metric-row">
+            <div class="qb-label-row">
+              <span class="qb-name"><i class="fa-solid fa-circle-check" style="color:var(--primary-emerald);"></i> Size</span>
+              <span class="qb-pct" id="qb-pct-size" style="color:var(--primary-emerald);">75%</span>
+            </div>
+            <div class="qb-bar-track">
+              <div class="qb-bar-fill" id="qb-bar-size" style="width:75%; background:var(--primary-emerald);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Summary Card -->
+        <div class="ai-summary-card">
+          <div class="ai-summary-title">
+            <i class="fa-solid fa-brain" style="color:var(--primary-emerald);"></i> AI Summary & Explanation
+          </div>
+          <p class="ai-summary-text" id="qr-summary-text">
+            The onion shows minor surface damage and slight shape irregularity. Color is good and size is within acceptable range. Overall quality is satisfactory.
+          </p>
+        </div>
+
+        <!-- Download Report PDF Button -->
+        <button class="btn-giant-download-pdf" onclick="appController.downloadReportPDF()">
+          <i class="fa-solid fa-download"></i> Download Report (PDF)
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         TAB 5: ANALYZE (MANDI PROCUREMENT ANALYTICS & HISTORY LEDGER)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-analyze" class="view-section">
+      
+      <div class="section-top-bar">
+        <div>
+          <h2 class="page-title"><i class="fa-solid fa-chart-pie" style="color:var(--primary-emerald);"></i> Procurement Analytics & Records</h2>
+          <p class="page-subtitle">Real-time statistics, quality distributions, defect frequency trends, and complete grading history</p>
+        </div>
+        <div class="quick-nav-actions">
+          <button class="btn-secondary-agri" onclick="ledgerEngine.exportCSV()">
+            <i class="fa-solid fa-file-csv"></i> Export Mandi CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Analytics KPI Grid -->
+      <div class="analytics-kpi-grid">
+        <div class="hero-stat-card">
+          <div class="hero-stat-val" style="color:var(--primary-emerald);" id="an-stat-scanned">1,482</div>
+          <div class="hero-stat-lbl">Total Onions Graded</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val" style="color:var(--grade-a);" id="an-stat-a">948 <span style="font-size:0.8rem;">(64%)</span></div>
+          <div class="hero-stat-lbl">Grade A (₹2,650/qtl)</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val" style="color:var(--grade-b);" id="an-stat-b">382 <span style="font-size:0.8rem;">(26%)</span></div>
+          <div class="hero-stat-lbl">Grade B (₹1,950/qtl)</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="hero-stat-val" style="color:var(--grade-reject);" id="an-stat-reject">152 <span style="font-size:0.8rem;">(10%)</span></div>
+          <div class="hero-stat-lbl">Grade C / Rejected</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="analytics-charts-grid">
+        <div class="chart-card-box">
+          <h3 class="chart-card-title"><i class="fa-solid fa-chart-pie" style="color:var(--primary-emerald);"></i> Grade Distribution</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-grade-distribution"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card-box">
+          <h3 class="chart-card-title"><i class="fa-solid fa-chart-bar" style="color:var(--accent-amber);"></i> Defect Frequency Breakdown</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-defect-breakdown"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trend Timeline -->
+      <div class="chart-card-box" style="margin-top:1.5rem;">
+        <h3 class="chart-card-title"><i class="fa-solid fa-chart-line" style="color:#1976d2;"></i> 7-Day Average Quality Score & APMC Mandi Price Trend</h3>
+        <div class="chart-wrapper" style="height:240px;">
+          <canvas id="chart-trend-timeline"></canvas>
+        </div>
+      </div>
+
+      <!-- Historical Grading Ledger Records -->
+      <div class="analyze-ledger-wrapper" style="margin-top:2rem;">
+        <div class="section-title-row">
+          <div>
+            <h3 class="section-heading-dark"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary-emerald);"></i> Analysis Records & Ledger</h3>
+            <p class="section-subtext">Filter, inspect, or delete previous onion grading records</p>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-secondary-agri" onclick="scanManager.restoreDefaultScans()">
+              <i class="fa-solid fa-rotate-left"></i> Restore Benchmark Samples
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="ledger-filter-row">
+          <div class="search-input-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="ledger-search-input" placeholder="Search by Sample ID, Farmer, Grade..." oninput="ledgerEngine.searchRecords(this.value)">
+          </div>
+
+          <div class="filter-buttons-group">
+            <button class="preset-chip-btn active" id="flt-all" onclick="ledgerEngine.filterGrade('ALL')">All</button>
+            <button class="preset-chip-btn" id="flt-a" onclick="ledgerEngine.filterGrade('Grade A')">Grade A</button>
+            <button class="preset-chip-btn" id="flt-b" onclick="ledgerEngine.filterGrade('Grade B')">Grade B</button>
+            <button class="preset-chip-btn" id="flt-c" onclick="ledgerEngine.filterGrade('Grade C')">Grade C</button>
+            <button class="preset-chip-btn" id="flt-reject" onclick="ledgerEngine.filterGrade('Reject')">Reject</button>
+          </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="ledger-table-container">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>Sample</th>
+                <th>Sample ID</th>
+                <th>Farmer / Source</th>
+                <th>Date & Time</th>
+                <th>Score</th>
+                <th>Grade</th>
+                <th>Main Defect</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body">
+              <!-- Dynamically populated with View & Delete options -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ----------------------------------------------------------------------
+         TAB 6: PROFILE (USER PROFILE, ROLE SWITCHER & LOGOUT OPTION)
+         ---------------------------------------------------------------------- -->
+    <section id="tab-profile" class="view-section">
+      
+      <div class="section-top-bar">
+        <div>
+          <h2 class="page-title"><i class="fa-solid fa-user-gear" style="color:var(--primary-emerald);"></i> Profile & Account Management</h2>
+          <p class="page-subtitle">Manage your Kisan identity, Mandi credentials, grading statistics, and preferences</p>
+        </div>
+      </div>
+
+      <!-- Profile Grid Layout -->
+      <div class="profile-layout-grid">
+        
+        <!-- Left Column: User Identity Card & Logout -->
+        <div class="profile-card-main">
+          
+          <div class="profile-avatar-banner">
+            <div class="profile-avatar-bubble" id="prof-user-avatar">👨‍🌾</div>
+            <div class="profile-status-pill" id="prof-status-pill">
+              <span class="pulse-dot"></span>
+              <span id="prof-status-text">Active Kisan Account</span>
+            </div>
+          </div>
+
+          <div class="profile-identity-info">
+            <h3 class="profile-full-name" id="prof-user-name">Rameshwar Patil</h3>
+            <div class="profile-user-role-badge" id="prof-user-role">Registered Farmer (Kisan)</div>
+            <p class="profile-location-text" id="prof-user-mandi">
+              <i class="fa-solid fa-location-dot"></i> Lasalgaon APMC Mandi, Nashik
+            </p>
+          </div>
+
+          <!-- User Information Rows -->
+          <div class="profile-details-list">
+            <div class="profile-detail-row">
+              <span class="detail-label"><i class="fa-solid fa-phone"></i> Mobile / ID</span>
+              <span class="detail-val" id="prof-user-phone">+91 98220 14821</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="detail-label"><i class="fa-solid fa-id-card"></i> APMC Yard ID</span>
+              <span class="detail-val mono-font" id="prof-user-apmc">MH-NSK-LSG-4091</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="detail-label"><i class="fa-solid fa-calendar-check"></i> Member Since</span>
+              <span class="detail-val">Kharif Season 2024</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="detail-label"><i class="fa-solid fa-shield-check"></i> AGMARK Status</span>
+              <span class="detail-val" style="color:var(--primary-emerald); font-weight:700;">Verified <i class="fa-solid fa-circle-check"></i></span>
+            </div>
+          </div>
+
+          <!-- Role Switcher -->
+          <div class="profile-role-switcher-card">
+            <div class="role-switcher-title"><i class="fa-solid fa-repeat"></i> Switch Active Role</div>
+            <div class="role-switch-buttons">
+              <button class="role-switch-btn active" id="prof-switch-farmer" onclick="authEngine.selectRole('farmer'); authEngine.handleLogin();">
+                <span>👨‍🌾</span> Farmer
+              </button>
+              <button class="role-switch-btn" id="prof-switch-officer" onclick="authEngine.selectRole('officer'); authEngine.handleLogin();">
+                <span>🏛️</span> Inspector
+              </button>
+              <button class="role-switch-btn" id="prof-switch-trader" onclick="authEngine.selectRole('trader'); authEngine.handleLogin();">
+                <span>💼</span> Trader
+              </button>
+            </div>
+          </div>
+
+          <!-- Account Actions: Logout / Login -->
+          <div class="profile-actions-row">
+            <button class="btn-logout-danger" id="btn-profile-logout" onclick="authEngine.handleLogout()">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span>Log Out</span>
+            </button>
+            <button class="btn-primary-green" id="btn-profile-login" style="display:none; width:100%;" onclick="appController.openLoginModal()">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              <span>Sign In to Account</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Grading Activity & System Preferences -->
+        <div class="profile-right-column">
+          
+          <!-- Activity Stats KPI Cards -->
+          <div class="profile-stats-card">
+            <h4 class="profile-subcard-title"><i class="fa-solid fa-chart-simple" style="color:var(--primary-emerald);"></i> Farmer Grading Statistics</h4>
+            <div class="prof-kpi-grid">
+              <div class="prof-kpi-box">
+                <div class="prof-kpi-val" id="prof-stat-scans">148</div>
+                <div class="prof-kpi-lbl">Total Onions Scanned</div>
+              </div>
+              <div class="prof-kpi-box">
+                <div class="prof-kpi-val" style="color:var(--grade-a);" id="prof-stat-a">68%</div>
+                <div class="prof-kpi-lbl">Grade A Export Ratio</div>
+              </div>
+              <div class="prof-kpi-box">
+                <div class="prof-kpi-val" style="color:#1976d2;" id="prof-stat-avg">86.4</div>
+                <div class="prof-kpi-lbl">Avg Quality Score</div>
+              </div>
+              <div class="prof-kpi-box">
+                <div class="prof-kpi-val" style="color:var(--accent-amber);" id="prof-stat-batches">42</div>
+                <div class="prof-kpi-lbl">Certified Batches</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings & Vision Preferences -->
+          <div class="profile-settings-card">
+            <h4 class="profile-subcard-title"><i class="fa-solid fa-sliders" style="color:var(--primary-emerald);"></i> System & Vision Preferences</h4>
+            
+            <div class="pref-item-row">
+              <div class="pref-info">
+                <div class="pref-name">Sound FX & Audio Feedback</div>
+                <div class="pref-desc">Play tone feedback during camera scans and quality grading</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-sound-toggle" checked onchange="appController.toggleSoundPreference(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-item-row">
+              <div class="pref-info">
+                <div class="pref-name">Auto-Save Scans to Ledger</div>
+                <div class="pref-desc">Automatically archive every camera scan into local digital history</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-autosave-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-item-row">
+              <div class="pref-info">
+                <div class="pref-name">Visual Defect Bounding Boxes (YOLOv8)</div>
+                <div class="pref-desc">Highlight localized cuts, mold rot, and sprout points on scan results</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-boxes-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Quick CTA Card -->
+          <div class="profile-cta-card">
+            <div class="cta-card-content">
+              <h4>Ready to grade more onions?</h4>
+              <p>Scan individual onions or load sample lots to generate certified digital reports.</p>
+            </div>
+            <button class="btn-primary-green" onclick="scannerEngine.startLiveDetectionMode()">
+              <i class="fa-solid fa-camera"></i> Start Scan
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       LOGIN / AUTHENTICATION MODAL
+       ======================================================================== -->
+  <div class="login-modal-overlay" id="login-modal">
+    <div class="login-card-paper">
+      
+      <!-- Close Button -->
+      <button class="action-btn-circle login-close-btn" onclick="appController.closeLoginModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Splash Branding Header -->
+      <div class="login-splash-header">
+        <div class="login-reticle-logo">
+          <svg viewBox="0 0 50 50" width="44" height="44">
+            <circle cx="25" cy="25" r="22" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" />
+            <path d="M25 10 C20 18 14 24 14 31 C14 36.5 19 41 25 41 C31 41 36 36.5 36 31 C36 24 30 18 25 10 Z" fill="#2e7d32" />
+            <path d="M25 18 C22 23 18 27 18 31 C18 34.5 21 37.5 25 37.5 C29 37.5 32 34.5 32 31 C32 27 28 23 25 18 Z" fill="#81c784" />
+          </svg>
+        </div>
+        <h2 class="login-brand-title">OnionGrade <span style="color:var(--primary-emerald);">AI</span></h2>
+        <p class="login-brand-subtitle">AI-Powered Onion Quality Assessment & Grading</p>
+      </div>
+
+      <!-- 4 Quick Workflow Pills -->
+      <div class="login-workflow-chips">
+        <div class="login-chip"><i class="fa-solid fa-camera"></i> Capture</div>
+        <div class="login-chip"><i class="fa-solid fa-brain"></i> Analyze</div>
+        <div class="login-chip"><i class="fa-solid fa-magnifying-glass"></i> Detect</div>
+        <div class="login-chip"><i class="fa-solid fa-chart-simple"></i> Grade</div>
+      </div>
+
+      <div class="login-tagline-text">
+        <strong>Smart. Fast. Accurate.</strong><br>
+        Consistent grading for better decisions and stronger farming.
+      </div>
+
+      <!-- Role Selection -->
+      <div class="role-selector-row">
+        <div class="role-btn active" id="role-btn-farmer" onclick="authEngine.selectRole('farmer')">
+          <span style="font-size:1.2rem;">👨‍🌾</span>
+          <span>Farmer</span>
+        </div>
+        <div class="role-btn" id="role-btn-officer" onclick="authEngine.selectRole('officer')">
+          <span style="font-size:1.2rem;">🏛️</span>
+          <span>Inspector</span>
+        </div>
+        <div class="role-btn" id="role-btn-trader" onclick="authEngine.selectRole('trader')">
+          <span style="font-size:1.2rem;">💼</span>
+          <span>Trader</span>
+        </div>
+      </div>
+
+      <!-- Login Form Input -->
+      <div class="login-form-group">
+        <label>Mobile Number / Farmer ID</label>
+        <div class="input-with-icon">
+          <i class="fa-solid fa-phone"></i>
+          <input type="text" id="login-input-user" value="+91 98220 14821" placeholder="Enter Mobile Number">
+        </div>
+      </div>
+
+      <div class="login-form-group">
+        <label>Mandi Pin / Password</label>
+        <div class="input-with-icon">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="login-input-pass" value="••••••••" placeholder="Enter PIN">
+        </div>
+      </div>
+
+      <!-- Sign In Button -->
+      <button class="btn-giant-login" onclick="authEngine.handleLogin()">
+        <span>Get Started</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+
+      <!-- Quick 1-Click Demo Login Shortcuts -->
+      <div class="quick-login-shortcuts">
+        <span style="font-size:0.75rem; color:var(--text-muted);">Quick Demo Login:</span>
+        <div style="display:flex; gap:0.4rem; justify-content:center; margin-top:0.3rem;">
+          <button class="quick-user-btn" onclick="authEngine.quickLogin('farmer')">👨‍🌾 Ramesh Patil</button>
+          <button class="quick-user-btn" onclick="authEngine.quickLogin('officer')">🏛️ Mandi Inspector</button>
+          <button class="quick-user-btn" onclick="authEngine.quickLogin('trader')">💼 Agro Trader</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       AI SCANNING PROCESSING MODAL
+       ======================================================================== -->
+  <div class="processing-modal-overlay" id="ai-processing-modal">
+    <div class="processing-card">
+      <div class="processing-spinner-box">
+        <div class="radar-scan-circle"></div>
+        <div class="processing-onion-icon">🧅</div>
+      </div>
+
+      <h3 class="processing-title">Analyzing Onion...</h3>
+      <p class="processing-subtitle">Running deep learning segmentation & metrology pipeline</p>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="proc-progress-fill"></div>
+      </div>
+
+      <div class="proc-steps-list">
+        <div class="proc-step-item" id="pstep-1"><i class="fa-solid fa-circle-notch fa-spin"></i> <span>Image received & validated</span></div>
+        <div class="proc-step-item" id="pstep-2"><i class="fa-regular fa-circle"></i> <span>Preprocessing & noise reduction</span></div>
+        <div class="proc-step-item" id="pstep-3"><i class="fa-regular fa-circle"></i> <span>Detecting onion contour & boundary</span></div>
+        <div class="proc-step-item" id="pstep-4"><i class="fa-regular fa-circle"></i> <span>Analyzing equatorial size (mm) & sphericity</span></div>
+        <div class="proc-step-item" id="pstep-5"><i class="fa-regular fa-circle"></i> <span>Evaluating skin tunic color uniformity</span></div>
+        <div class="proc-step-item" id="pstep-6"><i class="fa-regular fa-circle"></i> <span>Localizing surface cuts, rot & sprouting</span></div>
+        <div class="proc-step-item" id="pstep-7"><i class="fa-regular fa-circle"></i> <span>Computing AGMARK Grade & XAI explanation</span></div>
+      </div>
+
+      <div class="proc-complete-badge" id="proc-complete-msg">
+        <i class="fa-solid fa-circle-check"></i> Analysis Complete
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       DELETE CONFIRMATION MODAL
+       ======================================================================== -->
+  <div class="login-modal-overlay" id="delete-confirm-modal">
+    <div class="login-card-paper" style="max-width:380px; text-align:center;">
+      <div style="font-size:2.4rem; color:#ef4444; margin-bottom:0.75rem;"><i class="fa-solid fa-trash-can"></i></div>
+      <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:0.4rem;">Delete Scan Record?</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;" id="delete-confirm-text">
+        Are you sure you want to delete this scan record from your history?
+      </p>
+
+      <div style="display:flex; gap:0.75rem;">
+        <button class="btn-secondary-agri" style="flex:1;" onclick="scanManager.cancelDelete()">Cancel</button>
+        <button class="btn-primary-green" style="flex:1; background:#ef4444;" onclick="scanManager.confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       TOAST NOTIFICATION CONTAINER
+       ======================================================================== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript Engine -->
+  <script src="app.js"></script>
+</body>
+</html>
